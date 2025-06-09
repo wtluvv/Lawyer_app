@@ -1,27 +1,25 @@
-﻿using MySql.Data.MySqlClient;
+﻿using Lawyer_app.Models;
+using Supabase;
 
-public class DatabaseHelper
+public class DbHelper
 {
-    private string _connectionString = "Server=localhost;Database=TaskManager;User=root;Password=1234;";
+    private readonly Supabase.Client _supabase;
 
-    public List<Task> GetTasks()
+    public DbHelper()
     {
-        var tasks = new List<Task>();
-        using (var connection = new MySqlConnection(_connectionString))
-        {
-            connection.Open();
-            var command = new MySqlCommand("SELECT * FROM Tasks", connection);
-            var reader = command.ExecuteReader();
-            while (reader.Read())
-            {
-                tasks.Add(new Task
-                {
-                    Id = reader.GetInt32("Id"),
-                    Title = reader.GetString("Title"),
-                    Description = reader.GetString("Descripti   on")
-                });
-            }
-        }
-        return tasks;
+        var url = "https://wpbebvqcwmsuywkanppy.supabase.co";
+        var key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndwYmVidnFjd21zdXl3a2FucHB5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk0OTEyMzgsImV4cCI6MjA2NTA2NzIzOH0.TFnsjXYMTJWwnwHC25t9L1m_SnHOHhEaMgdGn_JFHE8";
+
+        _supabase = new Supabase.Client(url, key);
+        _supabase.InitializeAsync().Wait(); // Инициализация
+    }
+
+    public async Task<List<LawyerTask>> GetTasks()
+    {
+        var response = await _supabase
+            .From<LawyerTask>()
+            .Get();
+
+        return response.Models;
     }
 }
